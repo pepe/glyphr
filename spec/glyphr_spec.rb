@@ -1,3 +1,4 @@
+#encoding: utf-8
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 require File.expand_path(File.dirname(__FILE__) + '/../lib/glyphr')
 
@@ -29,7 +30,7 @@ describe Glyphr::Renderer do
       renderer.image_width.should == 10
     end
     it 'returns image height' do
-      renderer.image_size = '10x20'
+      renderer.image_size = '100x20'
       renderer.image_height.should == 20
     end
     it 'render method accepts text' do
@@ -39,8 +40,12 @@ describe Glyphr::Renderer do
       renderer.render('Hello world').should be_false
     end
     it 'returns true for render when image size set' do
-      renderer.image_size = '10x10'
+      renderer.image_size = '100x10'
       renderer.render('Hello world').should be_true
+    end
+    it 'renders high chars' do
+      renderer.image_size = '100x20'
+      renderer.render('Eble ĉiu kvazaŭ-deca fuŝĥoraĵo ĝojigos homtipon.')
     end
     it 'returns nil for image when not rendered' do
       renderer.image.should be_nil
@@ -96,6 +101,7 @@ describe Glyphr::Renderer do
     end
     it 'should render same image as in fixture' do
       renderer.image.save('output.png')
+      debugger
       FileUtils.compare_file('output.png', 'spec/fixtures/output.png').should be_true
     end
     it 'should render just one glyph' do

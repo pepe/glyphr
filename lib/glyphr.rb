@@ -1,4 +1,4 @@
-require 'oily_png'
+require 'oily_png/canvas'
 require 'ft2'
 
 module Glyphr
@@ -29,9 +29,10 @@ module Glyphr
       composition.each do |glyph_code|
         face.load_glyph(glyph_code, FT2::Load::NO_HINTING)
         glyph = face.glyph.render(FT2::RenderMode::NORMAL)
-        if x + glyph.bitmap_left < image_width
-          if glyph.bitmap.width > 0
-            image_compose x, glyph
+        bitmap = glyph.bitmap
+        if x + bitmap.width + glyph.bitmap_left < image_width
+          if bitmap.width > 0
+            image_compose x, glyph, bitmap
           end
           x = x + glyph.h_advance
         else
@@ -44,11 +45,11 @@ module Glyphr
     end
 
     def reset_image
-      @image = ChunkyPNG::Image.new(image_width, image_height, ChunkyPNG::Color::WHITE)
+      @image = OilyPNG::Canvas.new(image_width, image_height, ChunkyPNG::Color::WHITE)
     end
 
     def image
-      return @image
+      return @image.to_image if @image
     end
 
     def image_height
@@ -78,10 +79,14 @@ module Glyphr
       end
     end
 
-    def image_compose(x, glyph)
-      @image = @image.compose(ChunkyPNG::Image.new(glyph.bitmap.width, glyph.bitmap.rows, glyph.bitmap.buffer.bytes.to_a),
-                     x + glyph.bitmap_left,
-                     size - glyph.bitmap_top)
+    def image_compose(x, glyph, bitmap)
+      glyph_image = OilyPNG::Canvas.new(bitmap.width, bitmap.rows, bitmap.buffer.bytes.to_a)
+      y_off = (size - glyph.bitmap_top).to_i
+      if (bitmap.rows + y_off) > image_height
+        diff = (bitmap.rows + y_off) - image_height
+        glyph_image = glyph_image.crop(0, diff, glyph_image.width, glyph_image.height - diff)
+      end
+      @image.compose!(glyph_image, (x + glyph.bitmap_left).to_i, y_off)
     end
 
     # it readjust image in size and colors
