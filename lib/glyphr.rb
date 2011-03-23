@@ -29,7 +29,7 @@ module Glyphr
       composition.each do |glyph_code|
         face.load_glyph(glyph_code, FT2::Load::NO_HINTING)
         glyph = face.glyph.render(FT2::RenderMode::NORMAL)
-        if x + glyph.h_advance < image_width
+        if x + glyph.bitmap_left < image_width
           if glyph.bitmap.width > 0
             image_compose x, glyph
           end
