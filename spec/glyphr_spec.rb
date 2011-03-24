@@ -21,17 +21,8 @@ describe Glyphr::Renderer do
   end
   context 'Rendering' do
     let (:renderer) {Glyphr::Renderer.new(font_file, 36)}
-    it 'accepts image size' do
-      renderer.image_size = '10x10'
-      renderer.image_size.should == '10x10'
-    end
-    it 'returns image width' do
-      renderer.image_size = '10x20'
-      renderer.image_width.should == 10
-    end
-    it 'returns image height' do
-      renderer.image_size = '100x20'
-      renderer.image_height.should == 20
+    it 'accepts image width' do
+      renderer.image_width = 100
     end
     it 'render method accepts text' do
       renderer.render('Hello world')
@@ -40,25 +31,25 @@ describe Glyphr::Renderer do
       renderer.render('Hello world').should be_false
     end
     it 'returns true for render when image size set' do
-      renderer.image_size = '100x40'
+      renderer.image_width = 100
       renderer.render('Hello world').should be_true
     end
     it 'renders high chars' do
-      renderer.image_size = '100x20'
+      renderer.image_width = 100
       renderer.render('Eble ĉiu kvazaŭ-deca fuŝĥoraĵo ĝojigos homtipon.')
     end
     it 'returns nil for image when not rendered' do
       renderer.image.should be_nil
     end
     it 'should render just one glyph' do
-      renderer.image_size = '100x40'
+      renderer.image_width = 100
       renderer.render(11).should be_true
     end
   end
   context 'After rendering' do
     let (:renderer) {Glyphr::Renderer.new(font_file, 36)}
     before do
-      renderer.image_size = '10x10'
+      renderer.image_width = 100
       renderer.render('Hello world')
     end
 
@@ -85,7 +76,7 @@ describe Glyphr::Renderer do
   context 'Comparing output' do
     let(:renderer) {renderer = Glyphr::Renderer.new("spec/fixtures/metalista.otf", 72)}
     before do
-      renderer.image_size = '340x80'
+      renderer.image_width = 310
       renderer.render('hello world')
     end
     it 'should render same image as in fixture' do
@@ -100,7 +91,7 @@ describe Glyphr::Renderer do
   context 'Rendering array of glyphs' do
     let(:renderer) {renderer = Glyphr::Renderer.new("spec/fixtures/metalista.otf", 72)}
     before do
-      renderer.image_size = '340x80'
+      renderer.image_width = 310
       renderer.render(11, 133, 140, 140, 143, 3, 26, 143, 146, 140, 132)
     end
     it 'should render same image as in fixture' do
@@ -114,4 +105,5 @@ describe Glyphr::Renderer do
       renderer.glyphs_array_from('Hello World').should == [11, 133, 140, 140, 143, 3, 26, 143, 146, 140, 132]
     end
   end
+
 end
