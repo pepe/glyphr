@@ -40,7 +40,7 @@ describe Glyphr::Renderer do
       renderer.render('Hello world').should be_false
     end
     it 'returns true for render when image size set' do
-      renderer.image_size = '100x10'
+      renderer.image_size = '100x40'
       renderer.render('Hello world').should be_true
     end
     it 'renders high chars' do
@@ -49,6 +49,10 @@ describe Glyphr::Renderer do
     end
     it 'returns nil for image when not rendered' do
       renderer.image.should be_nil
+    end
+    it 'should render just one glyph' do
+      renderer.image_size = '100x40'
+      renderer.render(11).should be_true
     end
   end
   context 'After rendering' do
@@ -101,11 +105,7 @@ describe Glyphr::Renderer do
     end
     it 'should render same image as in fixture' do
       renderer.image.save('output.png')
-      debugger
       FileUtils.compare_file('output.png', 'spec/fixtures/output.png').should be_true
-    end
-    it 'should render just one glyph' do
-      renderer.render(11).should be_true
     end
   end
   context 'Converting text to glyphs array' do

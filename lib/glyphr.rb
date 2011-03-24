@@ -83,8 +83,7 @@ module Glyphr
       glyph_image = OilyPNG::Canvas.new(bitmap.width, bitmap.rows, bitmap.buffer.bytes.to_a)
       y_off = (size - glyph.bitmap_top).to_i
       if (bitmap.rows + y_off) > image_height
-        diff = (bitmap.rows + y_off) - image_height
-        glyph_image = glyph_image.crop(0, diff, glyph_image.width, glyph_image.height - diff)
+        y_off = crop(glyph_image, bitmap, y_off)
       end
       @image.compose!(glyph_image, (x + glyph.bitmap_left).to_i, y_off)
     end
@@ -92,6 +91,17 @@ module Glyphr
     # it readjust image in size and colors
     def readjust_image(width, height)
       @image.crop(0, 0, width, height)
+    end
+
+    def crop(glyph_image, bitmap, y_off)
+      diff = (bitmap.rows + y_off) - image_height
+      if y_off > diff
+        y_off = y_off - diff
+      else
+        diff = diff - y_off
+        y_off = 0
+        glyph_image.crop!(0, diff, glyph_image.width, glyph_image.height - diff)
+      end
     end
   end
 end
