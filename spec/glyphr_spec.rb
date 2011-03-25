@@ -102,7 +102,8 @@ describe Glyphr::Renderer do
   context 'Converting text to glyphs array' do
     let(:renderer) {renderer = Glyphr::Renderer.new("spec/fixtures/metalista.otf", 72)}
     it 'converts string to glyphs array' do
-      renderer.glyphs_array_from('Hello World').should == [11, 133, 140, 140, 143, 3, 26, 143, 146, 140, 132]
+      renderer.glyphs_from(['Hello World'])
+      renderer.glyph_codes.should == [11, 133, 140, 140, 143, 3, 26, 143, 146, 140, 132]
     end
   end
 

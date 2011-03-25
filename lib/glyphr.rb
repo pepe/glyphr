@@ -3,8 +3,8 @@ require 'ft2'
 
 module Glyphr
   class Renderer
-    attr_accessor :font, :size, :image_width
-    attr_reader :face, :image, :hinting
+    attr_accessor :font, :size, :image_width, :image_height
+    attr_reader :face, :image, :glyphs, :glyph_codes
 
     POINT_FRACTION = 26.6
     ONE64POINT = 64
@@ -21,25 +21,28 @@ module Glyphr
 
     def render(*composition)
       return false if not image_width or not composition
-      reset_image
-      x = LEFT_MARGIN
-      if composition.size == 1 && composition.first.is_a?(String)
-        composition = glyphs_array_from(composition.first)
-      end
 
-      composition.each do |glyph_code|
-        face.load_glyph(glyph_code, FT2::Load::NO_HINTING)
-        glyph = face.glyph.render(FT2::RenderMode::NORMAL)
-        bitmap = glyph.bitmap
-        if x + bitmap.width + glyph.bitmap_left < image_width
-          if bitmap.width > 0
-            image_compose x, glyph, bitmap
-          end
-          x = x + glyph.h_advance
-        else
-          break
-        end
-      end
+      glyphs_from composition
+
+      render_glyphs
+
+      reset_image
+
+      compose_to_image
+
+#      composition.each do |glyph_code|
+#        face.load_glyph(glyph_code, FT2::Load::NO_HINTING)
+#        glyph = face.glyph.render(FT2::RenderMode::NORMAL)
+#        bitmap = glyph.bitmap
+#        if x + bitmap.width + glyph.bitmap_left < image_width
+#          if bitmap.width > 0
+#            image_compose x, glyph, bitmap
+#          end
+#          x = x + glyph.h_advance
+#        else
+#          break
+#        end
+#      end
 
       return true
     end
@@ -52,15 +55,16 @@ module Glyphr
       return @image.to_image if @image
     end
 
-    #TODO move to its own class for font info
-    def glyphs_array_from(text)
-      arr = []
-      text.each_codepoint do |c|
-        arr << face.char_index(c)
+    def glyphs_from(composition)
+      @glyph_codes = []
+      if composition.size == 1 && composition.first.is_a?(String)
+        composition.first.each_codepoint do |c|
+          @glyph_codes << face.char_index(c)
+        end
+      else
+        @glyph_codes = composition
       end
-      return arr
     end
-
 
     private
     # sets up all attributes of freetype
@@ -72,15 +76,42 @@ module Glyphr
       end
     end
 
-    def image_compose(x, glyph, bitmap)
-      glyph_image = OilyPNG::Canvas.new(bitmap.width, bitmap.rows, bitmap.buffer.bytes.to_a)
-      y_off = (size - glyph.bitmap_top) - 1
-      x_off = (x + glyph.bitmap_left).to_i
-      @image.compose!(glyph_image, x_off, y_off)
+    def render_glyphs
+      @glyphs = []
+      self.image_height = 0
+      glyph_codes.each do |code|
+        face.load_glyph(code, FT2::Load::NO_HINTING)
+        glyph = face.glyph.render(FT2::RenderMode::NORMAL)
+        y_off = ((size * ONE64POINT) / RESOLUTION - glyph.bitmap_top).to_i
+        @glyphs << {
+          :pixels => glyph.bitmap.buffer.bytes.to_a,
+          :y_offset => y_off,
+          :left => glyph.bitmap_left.to_i,
+          :rows => glyph.bitmap.rows,
+          :width => glyph.bitmap.width,
+          :h_advance => glyph.h_advance
+        }
+        if (height = y_off + glyph.bitmap.rows) > image_height
+          self.image_height = height
+        end
+      end
     end
 
-    def image_height
-      @face_height ||= ((((face.ascender + face.descender.abs)/face.units_per_em.to_f) * size) * 1.1).round
+    def compose_to_image
+      x = LEFT_MARGIN
+      @glyphs.each do |glyph|
+        if x + glyph[:width] + glyph[:left] < image_width
+          if glyph[:width] > 0
+            glyph_image = OilyPNG::Canvas.new(glyph[:width],
+                                              glyph[:rows],
+                                              glyph[:pixels])
+            @image.compose!(glyph_image, x + glyph[:left], glyph[:y_offset])
+          end
+          x = (x + glyph[:h_advance]).to_i
+        else
+          break
+        end
+      end
     end
   end
 end
