@@ -30,20 +30,6 @@ module Glyphr
 
       compose_to_image
 
-#      composition.each do |glyph_code|
-#        face.load_glyph(glyph_code, FT2::Load::NO_HINTING)
-#        glyph = face.glyph.render(FT2::RenderMode::NORMAL)
-#        bitmap = glyph.bitmap
-#        if x + bitmap.width + glyph.bitmap_left < image_width
-#          if bitmap.width > 0
-#            image_compose x, glyph, bitmap
-#          end
-#          x = x + glyph.h_advance
-#        else
-#          break
-#        end
-#      end
-
       return true
     end
 
@@ -78,23 +64,26 @@ module Glyphr
 
     def render_glyphs
       @glyphs = []
-      self.image_height = 0
+      @y_min = 0
+      @image_height = 0
       glyph_codes.each do |code|
         face.load_glyph(code, FT2::Load::NO_HINTING)
         glyph = face.glyph.render(FT2::RenderMode::NORMAL)
-        y_off = ((size * ONE64POINT) / RESOLUTION - glyph.bitmap_top).to_i
+        x_min, y_min, x_max, y_max = face.glyph.glyph.cbox FT2::GlyphBBox::PIXELS
         @glyphs << {
+          :bitmap_top => glyph.bitmap_top,
           :pixels => glyph.bitmap.buffer.bytes.to_a,
-          :y_offset => y_off,
           :left => glyph.bitmap_left.to_i,
           :rows => glyph.bitmap.rows,
           :width => glyph.bitmap.width,
           :h_advance => glyph.h_advance
         }
-        if (height = y_off + glyph.bitmap.rows) > image_height
-          self.image_height = height
+        if (height = (y_max - y_min) + 1) > @image_height
+          @image_height = height
         end
+        @y_min = y_min if y_min < @y_min
       end
+      @image_height -= @y_min
     end
 
     def compose_to_image
@@ -105,7 +94,7 @@ module Glyphr
             glyph_image = OilyPNG::Canvas.new(glyph[:width],
                                               glyph[:rows],
                                               glyph[:pixels])
-            @image.compose!(glyph_image, x + glyph[:left], glyph[:y_offset])
+            @image.compose!(glyph_image, x + glyph[:left], (image_height - glyph[:bitmap_top] + @y_min))
           end
           x = (x + glyph[:h_advance]).to_i
         else
@@ -115,3 +104,4 @@ module Glyphr
     end
   end
 end
+
