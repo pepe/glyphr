@@ -6,7 +6,6 @@ module Glyphr
     attr_accessor :font, :size, :image_width, :image_height
     attr_reader :face, :image, :glyphs, :glyph_codes
 
-    POINT_FRACTION = 26.6
     ONE64POINT = 64
     RESOLUTION = 72
     LEFT_MARGIN = 10
@@ -58,7 +57,7 @@ module Glyphr
       unless face
         @face = FT2::Face.load(@font)
         face.select_charmap(FT2::Encoding::UNICODE)
-        face.set_char_size size * ONE64POINT, size * ONE64POINT, RESOLUTION, RESOLUTION
+        face.set_char_size 0, size * ONE64POINT, RESOLUTION, RESOLUTION
       end
     end
 
