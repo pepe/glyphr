@@ -8,7 +8,7 @@ module Glyphr
 
     ONE64POINT = 64
     RESOLUTION = 72
-    LEFT_MARGIN = 10
+    LEFT_MARGIN = 0
 
     def initialize(font = nil, size = 36)
       @font = font
@@ -94,14 +94,14 @@ module Glyphr
                                             glyph[:pixels])
           if x + glyph[:width] + glyph[:left] < image_width
             @image.compose!(glyph_image, x + glyph[:left], (image_height - glyph[:bitmap_top] + @y_min))
-          else
-            new_width = image_width - (x + glyph[:left])
+          elsif (new_width = image_width - (x + glyph[:left])) > 0
             glyph_image.crop!(0,0,new_width, glyph[:rows])
             @image.compose!(glyph_image, x + glyph[:left], (image_height - glyph[:bitmap_top] + @y_min))
+          else
             break
           end
-          x = (x + glyph[:h_advance]).to_i
         end
+        x = (x + glyph[:h_advance]).to_i
       end
     end
   end
