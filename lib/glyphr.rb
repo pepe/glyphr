@@ -88,16 +88,19 @@ module Glyphr
     def compose_to_image
       x = LEFT_MARGIN
       @glyphs.each do |glyph|
-        if x + glyph[:width] + glyph[:left] < image_width
-          if glyph[:width] > 0
-            glyph_image = OilyPNG::Canvas.new(glyph[:width],
-                                              glyph[:rows],
-                                              glyph[:pixels])
+        if glyph[:width] > 0
+          glyph_image = OilyPNG::Canvas.new(glyph[:width],
+                                            glyph[:rows],
+                                            glyph[:pixels])
+          if x + glyph[:width] + glyph[:left] < image_width
             @image.compose!(glyph_image, x + glyph[:left], (image_height - glyph[:bitmap_top] + @y_min))
+          else
+            new_width = image_width - (x + glyph[:left])
+            glyph_image.crop!(0,0,new_width, glyph[:rows])
+            @image.compose!(glyph_image, x + glyph[:left], (image_height - glyph[:bitmap_top] + @y_min))
+            break
           end
           x = (x + glyph[:h_advance]).to_i
-        else
-          break
         end
       end
     end
