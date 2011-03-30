@@ -76,7 +76,7 @@ describe Glyphr::Renderer do
   context 'Comparing output' do
     let(:renderer) {renderer = Glyphr::Renderer.new("spec/fixtures/metalista.otf", 72)}
     before do
-      renderer.image_width = 310
+      renderer.image_width = 280
       renderer.render('hello world')
     end
     it 'should render same image as in fixture' do
@@ -91,12 +91,21 @@ describe Glyphr::Renderer do
   context 'Rendering array of glyphs' do
     let(:renderer) {renderer = Glyphr::Renderer.new("spec/fixtures/metalista.otf", 72)}
     before do
-      renderer.image_width = 310
-      renderer.render(11, 133, 140, 140, 143, 3, 26, 143, 146, 140, 132)
+      renderer.image_width = 280
     end
-    it 'should render same image as in fixture' do
+    it 'renderers same image as in fixture' do
+      renderer.render(11, 133, 140, 140, 143, 3, 26, 143, 146, 140, 132)
       renderer.image.save('output.png')
       FileUtils.compare_file('output.png', 'spec/fixtures/output.png').should be_true
+    end
+    it 'renders when composition is array' do
+      arr = [11, 133, 140, 140, 143, 3, 26, 143, 146, 140, 132]
+      renderer.render(arr)
+      renderer.image.save('output.png')
+      FileUtils.compare_file('output.png', 'spec/fixtures/output.png').should be_true
+    end
+    after do
+      FileUtils.rm('output.png')
     end
   end
   context 'Converting text to glyphs array' do
@@ -104,6 +113,43 @@ describe Glyphr::Renderer do
     it 'converts string to glyphs array' do
       renderer.glyphs_from(['Hello World'])
       renderer.glyph_codes.should == [11, 133, 140, 140, 143, 3, 26, 143, 146, 140, 132]
+    end
+  end
+  context 'Matrix image computing' do
+    let(:renderer) {renderer = Glyphr::Renderer.new("spec/fixtures/metalista.otf", 72)}
+    before do
+      renderer.h_advance = 70
+      renderer.v_advance = 70
+      renderer.render_matrix([[10, 11, 12, 13],
+                              [14, 15, 16, 17]])
+    end
+    it 'computes width for matrix image' do
+      renderer.image_width.should == 280
+    end
+    it 'computes height for matrix image' do
+      renderer.image_height.should == 140
+    end
+  end
+  context 'Rendering to grid' do
+    let(:renderer) {renderer = Glyphr::Renderer.new("spec/fixtures/metalista.otf", 48)}
+    it 'renders on constant horizontal advance' do
+      renderer.image_width = 740
+      renderer.h_advance = 70
+      renderer.render('hello world')
+      renderer.image.save('output.png')
+      FileUtils.compare_file('output.png', 'spec/fixtures/advance_output.png').should be_true
+    end
+    it 'renders matrix of glyph codes' do
+      renderer.h_advance = 110
+      renderer.v_advance = 110
+      renderer.render_matrix([[10, 11, 12, 13],
+                              [14, 15, 16, 17]])
+      renderer.image.save('output.png')
+      FileUtils.compare_file('output.png', 'spec/fixtures/matrix_output.png').should be_true
+    end
+
+    after do
+      FileUtils.rm('output.png')
     end
   end
 
