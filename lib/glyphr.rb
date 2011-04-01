@@ -8,7 +8,7 @@ module Glyphr
 
     ONE64POINT = 64
     RESOLUTION = 72
-    LEFT_MARGIN = 0
+    LEFT_MARGIN = 6
     TOP_MARGIN = 70
 
     def initialize(font = nil, size = 36)
