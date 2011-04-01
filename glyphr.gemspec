@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{glyphr}
-  s.version = "0.3.0"
+  s.version = "0.3.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Josef Pospíšil"]
-  s.date = %q{2011-03-31}
+  s.date = %q{2011-04-01}
   s.description = %q{Library for rendering png images from otf font files, and general manipulation and info gathering from font file. Only rendering part is done and only on basic level.}
   s.email = %q{josef.pospisil@laststar.eu}
   s.extra_rdoc_files = [
@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
     "README.rdoc",
     "Rakefile",
     "VERSION",
+    "glyphr.gemspec",
     "lib/glyphr.rb",
     "spec/fixtures/Metalista.otf",
     "spec/fixtures/advance_output.png",
