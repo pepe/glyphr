@@ -24,7 +24,7 @@ module Glyphr
 
       glyphs_from composition
 
-      render_glyphs
+      compute_height
 
       reset_image
 
@@ -83,21 +83,12 @@ module Glyphr
       end
     end
 
-    def render_glyphs
+    def compute_height
       @glyphs = []
       @y_max = @y_min = @image_height = 0
       glyph_codes.each do |code|
         face.load_glyph(code, FT2::Load::NO_HINTING)
-        glyph = face.glyph.render(FT2::RenderMode::NORMAL)
         x_min, y_min, x_max, y_max = face.glyph.glyph.cbox FT2::GlyphBBox::PIXELS
-        @glyphs << {
-          :bitmap_top => glyph.bitmap_top,
-          :pixels => glyph.bitmap.buffer.bytes.to_a,
-          :left => glyph.bitmap_left.to_i,
-          :rows => glyph.bitmap.rows,
-          :width => glyph.bitmap.width,
-          :h_advance => glyph.h_advance
-        }
         @y_min = y_min if y_min < @y_min
         @y_max = y_max if y_max > @y_max
       end
@@ -106,21 +97,25 @@ module Glyphr
 
     def compose_to_image
       x = LEFT_MARGIN
-      @glyphs.each do |glyph|
-        if glyph[:width] > 0
-          glyph_image = OilyPNG::Canvas.new(glyph[:width],
-                                            glyph[:rows],
-                                            glyph[:pixels])
-          if x + glyph[:width] + glyph[:left] < image_width
-            @image.compose!(glyph_image, x + glyph[:left], (image_height - glyph[:bitmap_top] + @y_min))
-          elsif (new_width = image_width - (x + glyph[:left])) > 0
-            glyph_image.crop!(0,0,new_width, glyph[:rows])
-            @image.compose!(glyph_image, x + glyph[:left], (image_height - glyph[:bitmap_top] + @y_min))
+      glyph_codes.each do |code|
+        face.load_glyph(code, FT2::Load::NO_HINTING)
+        glyph = face.glyph.render(FT2::RenderMode::NORMAL)
+        if glyph.bitmap.width > 0
+          glyph_image = OilyPNG::Canvas.new(glyph.bitmap.width,
+                                            glyph.bitmap.rows,
+                                            glyph.bitmap.buffer.bytes.to_a)
+          pen_x = x + glyph.bitmap_left.to_i
+          pen_y = (image_height - glyph.bitmap_top + @y_min)
+          if pen_x + glyph.bitmap.width < image_width
+            @image.compose!(glyph_image, pen_x, pen_y)
+          elsif (new_width = image_width - pen_x) > 0
+            glyph_image.crop!(0,0,new_width, glyph.bitmap.rows)
+            @image.compose!(glyph_image, pen_x, pen_y)
           else
             break
           end
         end
-        x = (x + (h_advance || glyph[:h_advance])).to_i
+        x = (x + (h_advance || glyph.h_advance)).to_i
       end
     end
 
