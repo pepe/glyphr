@@ -96,10 +96,13 @@ module Glyphr
     end
 
     def compose_to_image
-      x = LEFT_MARGIN
+      x = false
       glyph_codes.each do |code|
         face.load_glyph(code, FT2::Load::NO_HINTING)
         glyph = face.glyph.render(FT2::RenderMode::NORMAL)
+        unless x
+          x = glyph.bitmap_left.to_i < 0 ? -glyph.bitmap_left.to_i : 0
+        end
         if glyph.bitmap.width > 0
           glyph_image = OilyPNG::Canvas.new(glyph.bitmap.width,
                                             glyph.bitmap.rows,
@@ -109,7 +112,7 @@ module Glyphr
           if pen_x + glyph.bitmap.width < image_width
             @image.compose!(glyph_image, pen_x, pen_y)
           elsif (new_width = image_width - pen_x) > 0
-            glyph_image.crop!(0,0,new_width, glyph.bitmap.rows)
+            glyph_image.crop!(0,0, new_width, glyph.bitmap.rows)
             @image.compose!(glyph_image, pen_x, pen_y)
           else
             break
