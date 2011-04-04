@@ -85,8 +85,7 @@ module Glyphr
 
     def render_glyphs
       @glyphs = []
-      @y_min = 0
-      @image_height = 0
+      @y_max = @y_min = @image_height = 0
       glyph_codes.each do |code|
         face.load_glyph(code, FT2::Load::NO_HINTING)
         glyph = face.glyph.render(FT2::RenderMode::NORMAL)
@@ -99,12 +98,10 @@ module Glyphr
           :width => glyph.bitmap.width,
           :h_advance => glyph.h_advance
         }
-        if (height = (y_max - y_min) + 1) > @image_height
-          @image_height = height
-        end
         @y_min = y_min if y_min < @y_min
+        @y_max = y_max if y_max > @y_max
       end
-      @image_height -= @y_min
+      @image_height = @y_max - @y_min
     end
 
     def compose_to_image
