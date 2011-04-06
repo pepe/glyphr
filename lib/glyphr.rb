@@ -78,7 +78,6 @@ module Glyphr
     def setup_ft
       unless face
         @face = FT2::Face.load(@font)
-        face.select_charmap(FT2::Encoding::UNICODE)
         face.set_char_size 0, size * ONE64POINT, RESOLUTION, RESOLUTION
       end
     end
