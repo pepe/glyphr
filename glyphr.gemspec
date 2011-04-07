@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.version = "0.3.6"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Josef Pospíšil"]
+  s.authors = ["Josef Pospisil"]
   s.date = %q{2011-04-07}
   s.description = %q{Library for rendering png images from otf font files, and general manipulation and info gathering from font file. Only rendering part is done and only on basic level.}
   s.email = %q{josef.pospisil@laststar.eu}
