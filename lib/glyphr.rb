@@ -3,8 +3,8 @@ require 'ft2'
 
 module Glyphr
   class Renderer
-    attr_accessor :font, :size, :image_width, :image_height, :h_advance, :v_advance
-    attr_reader :face, :image, :glyphs, :glyph_codes, :matrix
+    attr_accessor :font, :size, :image_width, :image_height, :h_advance, :v_advance, :items_per_line
+    attr_reader :face, :image, :glyphs, :glyph_codes, :matrix, :lines
 
     ONE64POINT = 64
     RESOLUTION = 72
@@ -42,6 +42,8 @@ module Glyphr
       compose_matrix
 
       draw_lines
+
+      return @lines
     end
 
     def reset_image
@@ -49,13 +51,11 @@ module Glyphr
     end
 
     def reset_matrix_image
-      @image_height = @matrix.size * v_advance
-      @image_width = @matrix.first.size * h_advance
+      computed_lines = (@matrix.size / items_per_line)
+      computed_lines += 1 if (@matrix.size % items_per_line) > 0
+      @image_height =  computed_lines * v_advance
+      @image_width = items_per_line * h_advance
       @image = OilyPNG::Canvas.new(image_width, image_height, ChunkyPNG::Color::WHITE)
-    end
-
-    def image
-      return @image.to_image if @image
     end
 
     def glyphs_from(composition)
@@ -123,26 +123,33 @@ module Glyphr
 
     def compose_matrix
       y = TOP_MARGIN
-      matrix.each do |line|
-        x = 0
-        line.each do |code|
-          begin
-            face.load_glyph(code, FT2::Load::NO_HINTING)
-          rescue Exception
-            next
-          end
-          glyph = face.glyph.render(FT2::RenderMode::NORMAL)
-          x_min, y_min, x_max, y_max = face.glyph.glyph.cbox FT2::GlyphBBox::PIXELS
-          width = x_max - x_min
-          if glyph.bitmap.width > 0
-            glyph_image = OilyPNG::Canvas.new(glyph.bitmap.width,
-                                              glyph.bitmap.rows,
-                                              glyph.bitmap.buffer.bytes.to_a)
-            @image.compose!(glyph_image, x + (h_advance/2.0 - width/2.0).to_i, y - glyph.bitmap_top)
-          end
-          x = x + h_advance
+      i = 1
+      x = 0
+      @lines = 0
+      matrix.each do |code|
+        @lines += 1 if i == 1
+        begin
+          face.load_glyph(code, FT2::Load::NO_HINTING)
+        rescue Exception
+          next
         end
-        y = y + v_advance
+        glyph = face.glyph.render(FT2::RenderMode::NORMAL)
+        x_min, y_min, x_max, y_max = face.glyph.glyph.cbox FT2::GlyphBBox::PIXELS
+        width = x_max - x_min
+        if glyph.bitmap.width > 0
+          glyph_image = OilyPNG::Canvas.new(glyph.bitmap.width,
+                                            glyph.bitmap.rows,
+                                            glyph.bitmap.buffer.bytes.to_a)
+          @image.compose!(glyph_image, x + (h_advance/2.0 - width/2.0).to_i, y - glyph.bitmap_top)
+          if i < items_per_line
+            i += 1
+            x = x + h_advance
+          else
+            i = 1
+            x = 0
+            y = y + v_advance
+          end
+        end
       end
     end
 
@@ -153,11 +160,10 @@ module Glyphr
         x = x + h_advance
       end
       y = (TOP_MARGIN + h_advance/3.0).to_i
-      (matrix.size - 1).times do
+      (@lines - 1).times do
         @image.line 0, y, image_width, y, ChunkyPNG::Color.rgb(128, 128, 128)
         y = y + v_advance
       end
-
     end
   end
 end

@@ -116,18 +116,21 @@ describe Glyphr::Renderer do
     end
   end
   context 'Matrix image computing' do
-    let(:renderer) {renderer = Glyphr::Renderer.new("spec/fixtures/metalista.otf", 72)}
+    let(:renderer) {renderer = Glyphr::Renderer.new("spec/fixtures/metalista.otf", 48)}
     before do
-      renderer.h_advance = 70
-      renderer.v_advance = 70
-      renderer.render_matrix([[10, 11, 12, 13],
-                              [14, 15, 16, 17]])
+      renderer.h_advance = 110
+      renderer.v_advance = 110
+      renderer.items_per_line = 7
+      renderer.render_matrix([10, 11, 12, 13, 14, 15, 16, 17])
     end
     it 'computes width for matrix image' do
-      renderer.image_width.should == 280
+      renderer.image_width.should == 770
     end
     it 'computes height for matrix image' do
-      renderer.image_height.should == 140
+      renderer.image_height.should == 220
+    end
+    it 'returns number of really rendered lines' do
+      renderer.lines.should == 2
     end
   end
   context 'Rendering to grid' do
@@ -142,8 +145,8 @@ describe Glyphr::Renderer do
     it 'renders matrix of glyph codes' do
       renderer.h_advance = 110
       renderer.v_advance = 110
-      renderer.render_matrix([[10, 11, 12, 13],
-                              [14, 15, 16, 17]])
+      renderer.items_per_line = 4
+      renderer.render_matrix([10, 11, 12, 13, 14, 15, 16, 17])
       renderer.image.save('output.png')
       FileUtils.compare_file('output.png', 'spec/fixtures/matrix_output.png').should be_true
     end
