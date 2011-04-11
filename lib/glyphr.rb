@@ -126,7 +126,11 @@ module Glyphr
       matrix.each do |line|
         x = 0
         line.each do |code|
-          face.load_glyph(code, FT2::Load::NO_HINTING)
+          begin
+            face.load_glyph(code, FT2::Load::NO_HINTING)
+          rescue Exception
+            next
+          end
           glyph = face.glyph.render(FT2::RenderMode::NORMAL)
           x_min, y_min, x_max, y_max = face.glyph.glyph.cbox FT2::GlyphBBox::PIXELS
           width = x_max - x_min
