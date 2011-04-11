@@ -49,9 +49,9 @@ module Glyphr
     end
 
     def reset_matrix_image
-      @image_width = @matrix.first.size * h_advance
       @image_height = @matrix.size * v_advance
-      reset_image
+      @image_width = @matrix.first.size * h_advance
+      @image = OilyPNG::Canvas.new(image_width, image_height, ChunkyPNG::Color::WHITE)
     end
 
     def image
@@ -124,7 +124,7 @@ module Glyphr
     def compose_matrix
       y = TOP_MARGIN
       matrix.each do |line|
-        x = LEFT_MARGIN
+        x = 0
         line.each do |code|
           face.load_glyph(code, FT2::Load::NO_HINTING)
           glyph = face.glyph.render(FT2::RenderMode::NORMAL)

@@ -19,7 +19,7 @@ Jeweler::Tasks.new do |gem|
   gem.summary = %Q{Library for font manipulation in ruby}
   gem.description = %Q{Library for rendering png images from otf font files, and general manipulation and info gathering from font file. Only rendering part is done and only on basic level.}
   gem.email = "josef.pospisil@laststar.eu"
-  gem.authors = ["Josef Pospíšil"]
+  gem.authors = ["Josef Pospisil"]
   # Include your dependencies below. Runtime dependencies are required when using your gem,
   # and development dependencies are only needed for development (ie running rake tasks, tests, etc)
   gem.add_runtime_dependency 'ft2-ruby', '~> 0.1.3'
