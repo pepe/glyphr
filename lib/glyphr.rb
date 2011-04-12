@@ -127,7 +127,6 @@ module Glyphr
       x = 0
       @lines = 0
       matrix.each do |code|
-        @lines += 1 if i == 1
         begin
           face.load_glyph(code, FT2::Load::NO_HINTING)
         rescue Exception
@@ -142,6 +141,7 @@ module Glyphr
                                             glyph.bitmap.buffer.bytes.to_a)
           @image.compose!(glyph_image, x + (h_advance/2.0 - width/2.0).to_i, y - glyph.bitmap_top)
           if i < items_per_line
+            @lines += 1 if i == 1
             i += 1
             x = x + h_advance
           else
