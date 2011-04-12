@@ -155,7 +155,7 @@ module Glyphr
 
     def draw_lines
       x = h_advance
-      (matrix.first.size - 1).times do
+      (items_per_line - 1).times do
         @image.line x, 0, x, image_height, ChunkyPNG::Color.rgb(128, 128, 128)
         x = x + h_advance
       end
