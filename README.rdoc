@@ -1,13 +1,13 @@
 = glyphr
 
 Simple library for accessing font file through freetype (and ft2-ruby)
-library.
+library and rendering it to png through chunky_png.
 
-Planned functions:
+Features:
 
 * Rendering to PNG (implemented)
+* Charmaps specimen rendering (implemented)
 * All typeface informations
-* Charmaps specimen rendering
 
 == Contributing to glyphr
 
