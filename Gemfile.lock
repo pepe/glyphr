@@ -1,5 +1,5 @@
 GIT
-  remote: git@github.com:pepe/ft2-ruby.git
+  remote: git://github.com/LastStar/ft2-ruby.git
   revision: 5f5b74959711feb1d0f9b2151871087375ddffd5
   specs:
     ft2-ruby (0.1.3)

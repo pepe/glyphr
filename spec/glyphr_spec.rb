@@ -74,7 +74,7 @@ describe Glyphr::Renderer do
     end
   end
   context 'Comparing output' do
-    let(:renderer) {renderer = Glyphr::Renderer.new("spec/fixtures/metalista.otf", 72)}
+    let(:renderer) {renderer = Glyphr::Renderer.new(font_file, 72)}
     before do
       renderer.image_width = 280
       renderer.render('hello world')
@@ -89,7 +89,7 @@ describe Glyphr::Renderer do
     end
   end
   context 'Rendering array of glyphs' do
-    let(:renderer) {renderer = Glyphr::Renderer.new("spec/fixtures/metalista.otf", 72)}
+    let(:renderer) {renderer = Glyphr::Renderer.new(font_file, 72)}
     before do
       renderer.image_width = 280
     end
@@ -109,14 +109,14 @@ describe Glyphr::Renderer do
     end
   end
   context 'Converting text to glyphs array' do
-    let(:renderer) {renderer = Glyphr::Renderer.new("spec/fixtures/metalista.otf", 72)}
+    let(:renderer) {renderer = Glyphr::Renderer.new(font_file, 72)}
     it 'converts string to glyphs array' do
       renderer.glyphs_from(['Hello World'])
       renderer.glyph_codes.should == [11, 133, 140, 140, 143, 3, 26, 143, 146, 140, 132]
     end
   end
   context 'Matrix image computing' do
-    let(:renderer) {renderer = Glyphr::Renderer.new("spec/fixtures/metalista.otf", 48)}
+    let(:renderer) {renderer = Glyphr::Renderer.new(font_file, 48)}
     before do
       renderer.h_advance = 110
       renderer.v_advance = 110
@@ -134,7 +134,7 @@ describe Glyphr::Renderer do
     end
   end
   context 'Rendering to grid' do
-    let(:renderer) {renderer = Glyphr::Renderer.new("spec/fixtures/metalista.otf", 48)}
+    let(:renderer) {renderer = Glyphr::Renderer.new(font_file, 48)}
     it 'renders on constant horizontal advance' do
       renderer.image_width = 740
       renderer.h_advance = 70
