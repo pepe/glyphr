@@ -1,7 +1,7 @@
 source "http://rubygems.org"
 
 gem 'oily_png'
-gem 'ft2-ruby'
+gem 'ft2-ruby', git: 'git@github.com:pepe/ft2-ruby.git'
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
