@@ -55,7 +55,7 @@ module Glyphr
       computed_lines += 1 if (@matrix.size % items_per_line) > 0
       @image_height =  computed_lines * v_advance
       @image_width = items_per_line * h_advance
-      @image = OilyPNG::Canvas.new(image_width, image_height, ChunkyPNG::Color::WHITE)
+      reset_image
     end
 
     def glyphs_from(composition)
